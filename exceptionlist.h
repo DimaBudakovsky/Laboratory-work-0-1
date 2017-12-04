@@ -88,3 +88,26 @@ public:
 private:
   int m_error_inx;
 };
+
+class ExseptionSortError: public ExseptionList
+{
+public:
+  ExseptionSortError()
+  {
+  }
+  ~ExseptionSortError()
+  {
+
+  }
+
+  std::string about_error()
+  {
+    std::ostringstream oss;
+    oss << m_error_inx;
+    std::string str_message("ExseptionSortError: Error sorted method!");
+    return str_message;
+  }
+
+private:
+  int m_error_inx;
+};

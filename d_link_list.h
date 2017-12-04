@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "sequence.h"
 
 //вспомогательный класс для реализации списка
 template <typename T> class Node
@@ -34,7 +35,7 @@ public:
 
   SequenceIter(Node<T>* item);
   //проверка на нулевой итератор
-  bool isListIterNull();
+  bool isIterNull();
 
   ~SequenceIter();
 
@@ -49,49 +50,13 @@ private:
   Node<T>* p_item;
 };
 
-template <typename T> class Sequence
-{
-public:
-  //получить итератор на первый элемент списка
-  virtual SequenceIter<T> begin() = 0;
-
-  //получить итератор на последний элемент списка
-  virtual SequenceIter<T> end() = 0;
-
-  //получить длину списка
-  virtual unsigned int getLength() const = 0;
-  //добавить новый элемент с значением value в конец списка
-  virtual void push_back( const T& value ) = 0;
-  //добавить новый элемент с значением value в начало списка
-  virtual void push_front( const T& value ) = 0;
-
-  //удалить последний элемент списка
-  virtual void pop_back() = 0;
-  //удалить первый элемент списка
-  virtual void pop_front() = 0;
-
-  //отчистить список, удалить данные, освободить память
-  virtual void clear() = 0;
-
-  //удалить элемент списка с индексом i
-  virtual bool eraseItem(unsigned int i) = 0;
-  //добавить элемент списка с индексом i, предыдущий элемент с индексом i сдвигается вправо 
-  /// как быть если i выходит за пределы длины списка??? на текущий момент возвращает false
-  virtual bool insertItem(const T& value, unsigned int i) = 0;
-
-  //записать значение элемента списка под индексом i в переменную ret_val
-  virtual bool getItem(T& ret_val, unsigned int i) const = 0;
-  //записать значение value в i-ый элемент списка
-  virtual bool setItem(const T& value, unsigned int i) = 0;
-
-
-};
-
 template <typename T> class DLinkList : public Sequence<T>
 {
 public:
   DLinkList();
   ~DLinkList();
+
+  SeqType getType() const;
 
   //получить итератор на первый элемент списка
   SequenceIter<T> begin();
@@ -101,6 +66,7 @@ public:
 
   //получить длину списка
   unsigned int getLength() const;
+  bool isEmpty() const;
   //добавить новый элемент с значением value в конец списка
   void push_back( const T& value );
   //добавить новый элемент с значением value в начало списка
@@ -126,16 +92,21 @@ public:
   bool setItem(const T& value, unsigned int i);
 
   //сортировка списка по возрастанию значения
-  void sort();
+  void sort(const SortMethod& method);
   //найти подмножество списка, возвращает индекс начала подмножества, либо -1 если не найдено
   int findSubList(const DLinkList& sub_list);
   //найти подмножество списка, возвращает итератор начала подмножества, если не найдено, то нулевой итератор
   SequenceIter<T> findSubListIter(const DLinkList& sub_list);
   //получить подмножество списка согласно заданным свойствам: 
   //[i_begin, i_end] диапазон элементов для обработки;
-  DLinkList getSubList(unsigned int i_begin, unsigned int i_end);
+  void getSubSeq(Sequence<T>* sub_list, unsigned int i_begin, unsigned int i_end);
+
+  bool clone(Sequence* seq);
   //слияние списка other с текущим
   void merge(const DLinkList& other );
+
+  void fromVec(const std::vector<T>& data);
+  bool compareVec(const std::vector<T>& data);
 
   //перегрузка конструктора копирования
   DLinkList(const DLinkList & other);
@@ -147,6 +118,9 @@ public:
   T & operator [] (unsigned int i);
 
 private:
+  void BubbleSortList();
+  void mergeSortList();
+  void RadixSort();
   //внутренние методы класса для удобства реализации
   //получить соседний элемент, следующий, если revert = false, иначе предыдущий
   Node<T>* getNeighborElement(Node<T>* item, bool revert = false) const;
